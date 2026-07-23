@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="GS-Agent: Creating 4D Physical Worlds With Generative Simulation">
+  <meta name="keywords" content="GS-Agent, Generative Simulation, 4D, Physical World, Genesis, Multi-Agent, Physics">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GS-Agent: Creating 4D Physical Worlds With Generative Simulation</title>
+
+  <meta property="og:title" content="GS-Agent: Creating 4D Physical Worlds With Generative Simulation"/>
+  <meta property="og:description" content="A multi-agent system that turns natural language into interactive, physically-grounded 4D worlds via generative simulation on the Genesis physics engine."/>
+  <meta property="og:type" content="website"/>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/gsagent.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link rel="icon" href="./static/images/favicon.png" type="image/png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<section class="hero gs-header">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            <span class="gs-gradient">GS-Agent</span>
+          </h1>
+          <h2 class="subtitle is-3 publication-subtitle">
+            Creating 4D Physical Worlds With Generative Simulation
+          </h2>
+
+          <div class="is-size-5 publication-authors" style="margin-top: 0.6rem;">
+            <span class="author-block">
+              <a href="https://icefoxzhx.github.io/">Hongxin Zhang</a><sup>1,2</sup>,</span>
+            <span class="author-block">
+              <a href="https://chunru-lin.github.io/">Chunru Lin</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://senfu.github.io/">Junyan Li</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.zhou-xian.com/">Zhou Xian</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://zswang666.github.io/">Tsun-Hsuan Wang</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://people.csail.mit.edu/ganchuang">Chuang Gan</a><sup>1</sup></span>
+          </div>
+
+          <div class="is-size-5 publication-authors" style="margin-top: 0.3rem;">
+            <span class="author-block"><sup>1</sup>University of Massachusetts Amherst</span>
+            <span class="author-block">&nbsp;&nbsp;<sup>2</sup>Genesis AI</span>
+          </div>
+
+          <div class="column has-text-centered" style="margin-top: 0.8rem;">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://arxiv.org/pdf/" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TEASER GALLERY (RGB / Normal / Particle) ===================== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered" style="margin-bottom: 1.2rem;">
+      <p class="gs-eyebrow">Physically-grounded 4D output</p>
+      <h2 class="title is-3 gs-section-title">One Prompt &rarr; A Simulatable 4D World</h2>
+      <p class="content" style="max-width: 720px; margin: 0.4rem auto 0;">
+        GS-Agent composes a scene in the physics engine and
+        rolls it forward in time. Because the output is a real simulation — not pixels — every frame exposes
+        consistent geometry and particle-level dynamics. Toggle the modality below.
+      </p>
+    </div>
+
+    <div class="gs-toggle" id="teaser-toggle">
+      <button data-modality="rgb" class="active">RGB</button>
+      <button data-modality="normal">Surface Normal</button>
+      <button data-modality="particle">Particles</button>
+      <button data-modality="code">Simulation Code</button>
+    </div>
+
+    <div class="gs-grid cols-2" id="teaser-grid">
+      <div class="gs-media">
+        <div class="gs-video"><video data-scene="1" src="./static/videos/teaser/1_rgb.mp4" autoplay muted loop playsinline></video></div>
+        <div class="gs-code" data-scene="1" hidden><pre><code class="language-python">scene_args = {'show_viewer': False, 'vis_options': {'show_world_frame': False}, 'profiling_options': {'show_FPS': True}, 'sim_options': {'dt': 0.0008, 'substeps': 10, 'gravity': [0, 0, -9.81]}, 'mpm_options': {'grid_density': 256, 'particle_size': 0.002, 'enable_CPIC': True, 'lower_bound': [-0.4, -0.4, 0.0], 'upper_bound': [0.4, 0.4, 0.5]},}
+camera_args = {'res': [1280, 720], 'pos': [0.16, 0.14, 0.18], 'lookat': [0.0, 0.0, 0.118], 'up': [0, 0, 1], 'fov': 34, 'model': 'pinhole', 'spp': 256, 'near': 0.001}
+LIGHTS = [{'pos': [0.28, -0.08, 0.23], 'color': [1.0, 0.92, 0.85], 'intensity': 45.0, 'radius': 0.06}, {'pos': [-0.22, 0.18, 0.25], 'color': [1.0, 0.95, 0.9], 'intensity': 22.0, 'radius': 0.04}, {'pos': [0.05, 0.35, 0.16], 'color': [1.0, 0.98, 0.95], 'intensity': 8.0, 'radius': 0.05}]
+renderer = 'RayTracer'
+env_sphere = {'image_path': 'demo/brown_photostudio_02_4k.exr', 'image_color': [0.7, 0.6, 0.55], 'radius': 1000.0, 'pos': [0.0, 0.0, 0.0], 'euler': [0, 0, 0]}
+
+def camera_control(camera, entity_name2idx: dict, current_scene_step: int, dt: float, horizon: int, is_lst_step: bool, video_save_to_filename: str):
+
+    if current_scene_step == 0:
+        os.makedirs(video_save_to_filename.replace('.mp4', ''), exist_ok=True)
+
+    target_fps = 24
+    render_frequency = 15
+    print('render_frequency', render_frequency)
+
+    if current_scene_step % render_frequency == 0:
+        phase = current_scene_step / max(1, horizon - 1)
+
+        lookat = [0.0, 0.0, 0.118]
+
+        start_pos = [0.16, 0.14, 0.18]
+        offset = [start_pos[i] - lookat[i] for i in range(3)]
+
+        push_factor = 1.0 - 0.18 * phase
+
+        theta = math.radians(-10.0 * phase)
+        cos_t, sin_t = math.cos(theta), math.sin(theta)
+        x, y = offset[0], offset[1]
+        x_r = cos_t * x - sin_t * y
+        y_r = sin_t * x + cos_t * y
+
+        z_r = offset[2] + 0.004 * math.sin(2 * math.pi * phase)
+
+        pos = [lookat[0] + push_factor * x_r,
+               lookat[1] + push_factor * y_r,
+               lookat[2] + push_factor * z_r]
+
+        camera.set_pose(pos=pos, lookat=lookat)
+
+        rgb, _, segmentation, normal = camera.render(rgb=True,depth=True,segmentation=True,colorize_seg=True,normal=True,antialiasing=True,force_render=True)
+
+        folder = video_save_to_filename.replace('.mp4', '')
+        frame_idx = current_scene_step // render_frequency
+        
+        if is_particle_view:
+            particle_path = os.path.join(folder, f'particle_{frame_idx:05d}.png')
+            Image.fromarray(rgb).save(particle_path)
+        else:
+            rgb_path = os.path.join(folder, f'rgb_{frame_idx:05d}.png')
+            segmentation_path = os.path.join(folder, f'segmentation_{frame_idx:05d}.png')
+            normal_path = os.path.join(folder, f'normal_{frame_idx:05d}.png')
+            Image.fromarray(segmentation).save(segmentation_path)
+            Image.fromarray(normal).save(normal_path)
+            Image.fromarray(rgb).save(rgb_path)
+        
+    if is_lst_step:
+        fps = max(1, len(camera._recorded_imgs) // int(horizon * dt))
+
+def entities_control(entities: list, entity_name2idx: dict, emitters: list, emitter_name2idx: dict, current_scene_step: int, horizon: int):
+    dt = 0.0008
+    t_start = 0.30
+    t_end = 4.50
+    start_step = int(t_start / dt)
+    end_step = int(t_end / dt)
+
+    nozzle_radius = 0.025
+    speed = 0.40
+
+    dither_radius = 0.015
+    dither_freq = 0.5
+
+    if start_step &lt;= current_scene_step &lt;= end_step:
+        t = current_scene_step * dt
+        phase = 2.0 * math.pi * dither_freq * max(0.0, t - t_start)
+        dx = dither_radius * math.cos(phase)
+        dy = dither_radius * math.sin(phase)
+        emitter = emitters[emitter_name2idx['chocolate_emitter']]
+        emitter.emit(
+            droplet_shape='circle',
+            droplet_size=nozzle_radius,
+            pos=(dx, dy, 0.22),
+            direction=(0.0, 0.0, -1.0),
+            theta=0.0,
+            speed=speed
+        )
+
+    return
+
+if is_particle_view:
+    ground = scene.add_entity(
+        morph=gs.morphs.Plane(pos=(0.0, 0.0, -1.0), euler=(0.0, 0.0, 0.0), fixed=True),
+        material=gs.materials.Rigid(rho=200.0, friction=1.0, coup_friction=0.5, coup_softness=0.002, coup_restitution=0.0),
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6))
+    )
+    tabletop = scene.add_entity(
+        morph=gs.morphs.Box(pos=(0.0, 0.0, -0.025), euler=(0.0, 0.0, 0.0), size=(1.0, 1.0, 0.05), fixed=True),
+        material=gs.materials.Rigid(rho=600.0, friction=1.2, coup_friction=0.8, coup_softness=0.002, coup_restitution=0.0),
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6))
+    )
+    s = 0.26 / (0.1302 - (-0.1302))
+    new_pos_z = (-(-0.0085) * s) + 0.0007
+    plate = scene.add_entity(
+        morph=gs.morphs.Mesh(coacd_options=coacd_options, file='demo/plate.glb', scale=s, pos=(0.0, 0.0, new_pos_z), euler=(90, 0, 90), fixed=False),
+        material=gs.materials.Rigid(rho=800.0, friction=0.9, coup_friction=1.5, coup_softness=0.006, coup_restitution=0.0),
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6))
+    )
+    cake = scene.add_entity(
+        morph=gs.morphs.Cylinder(pos=(0.0, 0.0, 0.0600), euler=(0.0, 0.0, 0.0), radius=0.09, height=0.10, fixed=False),
+        material=gs.materials.Rigid(rho=300.0, friction=1.0, coup_friction=0.8, coup_softness=0.002, coup_restitution=0.0, sdf_min_res=256, sdf_max_res=256),
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6))
+    )
+    chocolate_emitter = scene.add_emitter(
+        material=gs.materials.MPM.Liquid(E=1e6, nu=0.3, rho=1200.0, viscous=True, sampler='random'),
+        max_particles=150000,
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6), vis_mode='particle')
+    )
+else:
+    ground = scene.add_entity(
+        morph=gs.morphs.Plane(pos=(0.0, 0.0, -1.0), euler=(0.0, 0.0, 0.0), fixed=True),
+        material=gs.materials.Rigid(rho=200.0, friction=1.0, coup_friction=0.5, coup_softness=0.002, coup_restitution=0.0),
+        surface=gs.surfaces.Default(color=(0.6, 0.6, 0.6), roughness=0.8, ior=1.5)
+    )
+    tabletop = scene.add_entity(
+        morph=gs.morphs.Box(pos=(0.0, 0.0, -0.025), euler=(0.0, 0.0, 0.0), size=(1.0, 1.0, 0.05), fixed=True),
+        material=gs.materials.Rigid(rho=600.0, friction=1.2, coup_friction=0.8, coup_softness=0.002, coup_restitution=0.0),
+        surface=gs.surfaces.Rough(color=(0.58, 0.40, 0.20), double_sided=True, vis_mode='visual')
+    )
+    s = 0.26 / (0.1302 - (-0.1302))
+    new_pos_z = (-(-0.0085) * s) + 0.0007
+    plate = scene.add_entity(
+        morph=gs.morphs.Mesh(coacd_options=coacd_options, file='demo/plate.glb', scale=s, pos=(0.0, 0.0, new_pos_z), euler=(90, 0, 90), fixed=False),
+        material=gs.materials.Rigid(rho=800.0, friction=0.9, coup_friction=1.5, coup_softness=0.006, coup_restitution=0.0),
+        surface=gs.surfaces.Smooth(double_sided=True, vis_mode='visual')
+    )
+    cake = scene.add_entity(
+        morph=gs.morphs.Cylinder(pos=(0.0, 0.0, 0.0600), euler=(0.0, 0.0, 0.0), radius=0.09, height=0.10, fixed=False),
+        material=gs.materials.Rigid(rho=300.0, friction=1.0, coup_friction=0.8, coup_softness=0.002, coup_restitution=0.0, sdf_min_res=256, sdf_max_res=256),
+        surface=gs.surfaces.Default(color=(0.78, 0.62, 0.32), roughness=0.85, ior=1.4)
+    )
+    chocolate_emitter = scene.add_emitter(
+        material=gs.materials.MPM.Liquid(E=1e6, nu=0.3, rho=1200.0, viscous=True, sampler='random'),
+        max_particles=150000,
+        surface=gs.surfaces.Smooth(color=(0.10, 0.05, 0.03), double_sided=True, vis_mode='recon', recon_backend='splashsurf-1.5-smooth-25')
+    )
+
+if not scene.is_built:
+    scene.build()
+horizon = 3000
+os.makedirs("demo_code/choco", exist_ok=True)
+for _ in range(horizon):
+    gs.logger.info(f"{_}/{horizon} steps advanced")
+    entities_control(scene.entities, {'ground': 0, 'tabletop': 1, 'plate': 2, 'cake': 3}, scene.emitters, {'chocolate_emitter': 0}, scene.t, horizon)
+    camera_control(camera, {'ground': 0, 'tabletop': 1, 'plate': 2, 'cake': 3}, scene.t, scene.dt, horizon, _ == horizon - 1, "demo_code/choco.mp4")
+    scene.step()</code></pre></div>
+      </div>
+      <div class="gs-media">
+        <div class="gs-video"><video data-scene="2" src="./static/videos/teaser/2_rgb.mp4" autoplay muted loop playsinline></video></div>
+        <div class="gs-code" data-scene="2" hidden><pre><code class="language-python">scene_args = {'show_viewer': False, 'vis_options': {'show_world_frame': False, 'show_link_frame': False, 'show_cameras': False, 'shadow': True, 'plane_reflection': False, 'background_color': [0.1, 0.1, 0.12], 'visualize_mpm_boundary': False, 'visualize_sph_boundary': False, 'visualize_pbd_boundary': False, 'segmentation_level': 'link', 'render_particle_as': 'sphere'}, 'profiling_options': {'show_FPS': True}, 'mpm_options': {'grid_density': 128, 'particle_size': 0.003, 'enable_CPIC': False, 'lower_bound': [-0.6, -0.5, -0.2], 'upper_bound': [0.6, 0.5, 0.8]}, 'sim_options': {'dt': 0.001, 'substeps': 8, 'gravity': [0.0, 0.0, -9.81]}}
+renderer = 'RayTracer'
+
+LIGHTS = [{'pos': [-6.0, -5.5, 3.5], 'color': [1.0, 0.92, 0.82], 'intensity': 30.0, 'radius': 3.2}]
+env_sphere = {'image_path': 'demo/desert.exr', 'image_color': [0.75, 0.85, 0.95], 'radius': 1000.0, 'pos': [0.0, 0.0, 0.0], 'euler': [0.0, 0.0, 0.0]}
+
+def camera_control(camera, entity_name2idx: dict, current_scene_step: int, dt: float, horizon: int, is_lst_step: bool, video_save_to_filename: str):
+
+    t = current_scene_step * dt
+    total_time = horizon * dt
+
+    if current_scene_step == 0:
+        camera.start_recording()
+        os.makedirs(video_save_to_filename.replace('.mp4', ''), exist_ok=True)
+
+    def smoothstep(a, b, s):
+        s = max(0.0, min(1.0, s))
+        s = s * s * (3 - 2 * s)
+        return a * (1 - s) + b * s
+
+    A_start, A_end = 0.0, 1.0
+    macro_pos = [-0.33, 0.12, 0.09]
+    macro_look = [-0.25, 0.0, 0.06]
+
+    B_start = 1.0
+
+    ball_idx = entity_name2idx.get('basketball', None)
+    if ball_idx is not None:
+        ball_info = get_entity_info(ball_idx)
+        bx, by, bz = ball_info['pos']
+    else:
+        bx, by, bz = (-0.25, 0.0, 0.2)
+
+    follow_offset = [-0.28, 0.18, 0.16]
+    target_pos = [bx + follow_offset[0], by + follow_offset[1], bz + follow_offset[2]]
+    target_look = [bx + 0.06, by + 0.00, bz - 0.12]
+
+    if t &lt;= A_end:
+        s = (t - A_start) / max(1e-6, (A_end - A_start))
+        dolly_pos = [macro_pos[0] - 0.015 * s, macro_pos[1], macro_pos[2] - 0.005 * s]
+        dolly_look = macro_look
+        cam_pos = dolly_pos
+        cam_look = dolly_look
+    else:
+        trans_dur = 0.6
+        s = (t - B_start) / trans_dur
+        s = max(0.0, min(1.0, s))
+        cam_pos = [
+            smoothstep(macro_pos[0], target_pos[0], s),
+            smoothstep(macro_pos[1], target_pos[1], s),
+            smoothstep(macro_pos[2], target_pos[2], s),
+        ]
+        cam_look = [
+            smoothstep(macro_look[0], target_look[0], s),
+            smoothstep(macro_look[1], target_look[1], s),
+            smoothstep(macro_look[2], target_look[2], s),
+        ]
+        if s &gt;= 1.0:
+            cam_pos = target_pos
+            cam_look = target_look
+
+    camera.set_pose(pos=cam_pos, lookat=cam_look)
+
+    target_fps = 30
+    render_frequency = max(1, int(1 / (dt * target_fps)))
+    print(f"Render frequency: every {render_frequency} steps")
+
+    if current_scene_step % render_frequency == 0:
+        rgb, _, segmentation, normal = camera.render(rgb=True,depth=True,segmentation=True,colorize_seg=True,normal=True,antialiasing=True,force_render=True)
+
+        folder = video_save_to_filename.replace('.mp4', '')
+        os.makedirs(folder, exist_ok=True)
+        frame_idx = current_scene_step // render_frequency
+
+        if is_particle_view:
+            particle_path = os.path.join(folder, f'particle_{frame_idx:05d}.png')
+            Image.fromarray(rgb).save(particle_path)
+        else:
+            rgb_path = os.path.join(folder, f'rgb_{frame_idx:05d}.png')
+            segmentation_path = os.path.join(folder, f'segmentation_{frame_idx:05d}.png')
+            normal_path = os.path.join(folder, f'normal_{frame_idx:05d}.png')
+            Image.fromarray(segmentation).save(segmentation_path)
+            Image.fromarray(normal).save(normal_path)
+            Image.fromarray(rgb).save(rgb_path)
+
+    if is_lst_step:
+        sim_duration = max(dt, total_time)
+        fps = max(1, int(len(camera._recorded_imgs) / sim_duration))
+        camera.stop_recording(save_to_filename=video_save_to_filename, fps=fps)
+
+def entities_control(entities: list, entity_name2idx: dict, emitters: list, emitter_name2idx: dict, current_scene_step: int, horizon: int):
+    if current_scene_step == 0:
+        if 'sand_bed' in entity_name2idx:
+            try:
+                entities[entity_name2idx['sand_bed']].set_velocity([0.0, 0.0, 0.0])
+            except Exception as e:
+                print(f"Warning: could not set initial velocity for sand_bed: {e}")
+        if 'basketball' in entity_name2idx:
+            try:
+                entities[entity_name2idx['basketball']].set_dofs_velocity([1.2, 0.0, 0.0, 0.0, 5.0, 0.0])
+            except Exception as e:
+                print(f"Warning: could not set initial velocity for basketball: {e}")
+    return
+
+if is_particle_view:
+    sand_bed = scene.add_entity(
+        morph=gs.morphs.Box(pos=(0.0, 0.0, 0.055-0.08), euler=(0.0, 0.0, 0.0), size=(1.02, 0.8, 0.06+0.14), fixed=False),
+        material=gs.materials.MPM.Sand(rho=1600.0, sampler='random', friction_angle=42),
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6), vis_mode='particle')
+    )
+    basketball = scene.add_entity(
+        morph=gs.morphs.Mesh(coacd_options=coacd_options, file='demo/ball.glb', scale=1.0, pos=(-0.50, 0.00, 0.60), euler=(90.0, 0.0, 90.0), fixed=False),
+        material=gs.materials.Rigid(rho=1690.0, friction=None, coup_friction=0.7, coup_softness=0.002, coup_restitution=0.05),
+        surface=gs.surfaces.Rough(color=(0.6, 0.6, 0.6))
+    )
+else:
+    sand_bed = scene.add_entity(
+        morph=gs.morphs.Box(pos=(0.0, 0.0, 0.055-0.08), euler=(0.0, 0.0, 0.0), size=(1.02, 0.8, 0.06+0.14), fixed=False),
+        material=gs.materials.MPM.Sand(rho=1600.0, sampler='random', friction_angle=42),
+        surface=gs.surfaces.Default(color=(0.85, 0.75, 0.55), double_sided=True, vis_mode='particle')
+    )
+    basketball = scene.add_entity(
+        morph=gs.morphs.Mesh(coacd_options=coacd_options, file='demo/ball.glb', scale=1.0, pos=(-0.50, 0.00, 0.60), euler=(90.0, 0.0, 90.0), fixed=False),
+        material=gs.materials.Rigid(rho=1690.0, friction=None, coup_friction=0.7, coup_softness=0.002, coup_restitution=0.05),
+        surface=gs.surfaces.Rough(double_sided=True)
+    )
+
+if not scene.is_built:
+    scene.build()
+horizon = 2400
+os.makedirs("demo_code/ball", exist_ok=True)
+for _ in range(horizon):
+    gs.logger.info(f"{_}/{horizon} steps advanced")
+    entities_control(scene.entities, {'sand_bed': 0, 'basketball': 1}, scene.emitters, {}, scene.t, horizon)
+    camera_control(camera, {'sand_bed': 0, 'basketball': 1}, scene.t, scene.dt, horizon, _ == horizon - 1, "demo_code/ball.mp4")
+    scene.step()</code></pre></div>
+      </div>
+      <div class="gs-media">
+        <div class="gs-video"><video data-scene="3" src="./static/videos/teaser/3_rgb.mp4" autoplay muted loop playsinline></video></div>
+        <div class="gs-code" data-scene="3" hidden><pre><code class="language-python">scene_args = {'show_viewer': False, 'vis_options': {'show_world_frame': False}, 'profiling_options': {'show_FPS': True}, 'sim_options': {'dt': 0.0005, 'substeps': 8, 'gravity': [0, 0, -9.81]}, 'sph_options': {'particle_size': 0.002, 'lower_bound': [-0.5, -0.5, 0.0], 'upper_bound': [0.5, 0.5, 1.0]}}
+camera_args = {'res': [1920, 1080], 'pos': [0.0, 0.25, 0.5], 'lookat': [0.0, 0.0, 0.5], 'up': [0.0, 0.0, 1.0], 'fov': 55, 'model': 'pinhole', 'aperture': 2.8, 'spp': 1536}
+LIGHTS = [{'pos': [0.28, -0.08, 0.23], 'color': [1.0, 0.92, 0.85], 'intensity': 45.0, 'radius': 0.06}, {'pos': [-0.22, 0.18, 0.25], 'color': [1.0, 0.95, 0.9], 'intensity': 22.0, 'radius': 0.04}, {'pos': [0.05, 0.35, 0.16], 'color': [1.0, 0.98, 0.95], 'intensity': 8.0, 'radius': 0.05}]
+renderer = 'RayTracer'
+env_sphere = {'image_path': 'demo/brown_photostudio_02_4k.exr', 'image_color': [0.7, 0.6, 0.55], 'radius': 1000.0, 'pos': [0.0, 0.0, 0.0], 'euler': [0, 0, 0]}
+
+def camera_control(camera, entity_name2idx: dict, current_scene_step: int, dt: float, horizon: int, is_lst_step: bool, video_save_to_filename: str):
+
+    record_duration_s = 0.12
+    record_steps = max(1, int(record_duration_s / dt + 1e-9))
+    target_fps = 60
+
+    if current_scene_step == 0:
+        camera.start_recording()
+
+    if current_scene_step &lt; record_steps and current_scene_step % 1 == 0:
+        pos = [0.00, 0.15, 0.50]
+        lookat = [0.00, 0.00, 0.50]
+        camera.set_pose(pos=pos, lookat=lookat)
+        camera.render()
+        dirpath = video_save_to_filename.replace('.mp4', '')
+        os.makedirs(dirpath, exist_ok=True)
+        image_path = os.path.join(dirpath, f'frame_{current_scene_step:04d}.png')
+        Image.fromarray(camera._recorded_imgs[-1]).save(image_path)
+
+    if current_scene_step == (record_steps - 1):
+        camera.stop_recording(save_to_filename=video_save_to_filename, fps=target_fps)
+
+def entities_control(entities: list, entity_name2idx: dict, emitters: list, emitter_name2idx: dict, current_scene_step: int, horizon: int):
+    if current_scene_step == 0 and 'droplet' in entity_name2idx:
+        entities[entity_name2idx['droplet']].set_velocity([0.0, 0.0, 0.0])
+
+    if 'strawberry' in entity_name2idx:
+        ent = entities[entity_name2idx['strawberry']]
+        if current_scene_step == 0:
+            ent.set_dofs_kv([10.0] * ent.n_dofs)
+            ent.control_dofs_velocity([2.5, 0.0, 0.0, 0.0, 0.0, 0.2])
+
+droplet = scene.add_entity(
+    morph=gs.morphs.Sphere(pos=(0.0, 0.0, 0.5), euler=(0.0, 0.0, 0.0), radius=0.015, fixed=False),
+    material=gs.materials.SPH.Liquid(rho=1000.0, stiffness=50000.0, exponent=7.0, mu=0.0012, gamma=0.012, sampler='pbs'),
+    surface=gs.surfaces.Glass(color=(0.7, 0.85, 1.0), double_sided=True, vis_mode='recon')
+)
+strawberry = scene.add_entity(
+    morph=gs.morphs.Mesh(coacd_options=coacd_options, file='demo/strawberry.glb', scale=0.915, pos=(-0.12, 0.0, 0.5), euler=(0.0, 180.0, -90.0), fixed=False),
+    material=gs.materials.Rigid(rho=1000.0, friction=0.6, coup_friction=0.1, coup_softness=0.002, coup_restitution=0.0),
+    surface=gs.surfaces.Smooth(double_sided=True)
+)
+
+if scene.is_built:
+    scene.reset()
+
+if not scene.is_built:
+    scene.build()
+horizon = 240
+os.makedirs("demo_code/berry1", exist_ok=True)
+for _ in range(horizon):
+    gs.logger.info(f"{_}/{horizon} steps advanced")
+    entities_control(scene.entities, {'droplet': 0, 'strawberry': 1}, scene.emitters, {}, scene.t, horizon)
+    camera_control(camera, {'droplet': 0, 'strawberry': 1}, scene.t, scene.dt, horizon, _ == horizon - 1, "demo_code/berry1.mp4")
+    scene.step()</code></pre></div>
+      </div>
+      <div class="gs-media">
+        <div class="gs-video"><video data-scene="4" src="./static/videos/teaser/4_rgb.mp4" autoplay muted loop playsinline></video></div>
+        <div class="gs-code" data-scene="4" hidden><pre><code class="language-python">scene_args = {'show_viewer': False, 'vis_options': {'show_world_frame': False}, 'profiling_options': {'show_FPS': True}, 'mpm_options': {'grid_density': 128, 'enable_CPIC': True, 'lower_bound': [-1.0, -1.0, 0.0], 'upper_bound': [1.0, 1.0, 1.5]}, 'sim_options': {'dt': 0.0006, 'substeps': 10, 'gravity': [0.0, 0.0, -9.81]}}
+camera_args = {'res': [1280, 720], 'pos': [0.4, -0.4, 0.95], 'lookat': [0.0, 0.0, 0.76], 'up': [0.0, 0.0, 1.0], 'fov': 28, 'model': 'pinhole', 'aperture': 2.8, 'spp': 1024}
+LIGHTS = [{'pos': [-3.0, -2.0, 5.0], 'color': [1.0, 0.98, 0.95], 'intensity': 6, 'radius': 1.5}, {'pos': [3.0, 2.0, 5.0], 'color': [1.0, 1.0, 1.0], 'intensity': 5, 'radius': 1.5}, {'pos': [0.0, -4.0, 3.5], 'color': [0.95, 1.0, 1.05], 'intensity': 4, 'radius': 1.2}]
+renderer = 'RayTracer'
+env_sphere = {'image_path': 'assets/hdris/brown_photostudio_02.exr', 'image_color': [0.6, 0.65, 0.7], 'radius': 1000.0, 'pos': [0.0, 0.0, 0.0], 'euler': [0.0, 0.0, -35.0]}
+
+def camera_control(camera, entity_name2idx: dict, current_scene_step: int, dt: float, horizon: int, is_lst_step: bool, video_save_to_filename: str):
+
+    camera.set_pose(pos=[0.4, -0.4, 0.95], lookat=[0.0, 0.0, 0.76])
+
+    if not hasattr(camera, '_sc_macro_started'):
+        camera._sc_macro_started = False
+        camera._sc_macro_start_step = 0
+
+    if not camera._sc_macro_started:
+        camera.start_recording()
+        camera._sc_macro_started = True
+        camera._sc_macro_start_step = current_scene_step
+
+    steps_elapsed = current_scene_step - camera._sc_macro_start_step
+
+    render_frequency = 55
+
+    if steps_elapsed &gt;= 0 and steps_elapsed &lt;= 14168 and (steps_elapsed % render_frequency == 0):
+        camera.render()
+        image_dir = video_save_to_filename.replace('.mp4', '')
+        os.makedirs(image_dir, exist_ok=True)
+        img_idx = len(camera._recorded_imgs) - 1
+        Image.fromarray(camera._recorded_imgs[-1]).save(os.path.join(image_dir, f'frame_{img_idx}.png'))
+
+    if camera._sc_macro_started and (steps_elapsed &gt;= 14168 or is_lst_step):
+        fps = max(1, int(round(len(camera._recorded_imgs) / 8.5)))
+        camera.stop_recording(save_to_filename=video_save_to_filename, fps=fps)
+
+def entities_control(entities: list, entity_name2idx: dict, emitters: list, emitter_name2idx: dict, current_scene_step: int, horizon: int):
+    dt = 0.001
+    t = current_scene_step * dt
+
+    gp = entities[entity_name2idx['glass_plate']]
+
+    if current_scene_step == 0:
+        gp.set_dofs_kp([15000.0, 15000.0, 20000.0, 1000.0, 1000.0, 1000.0])
+        gp.set_dofs_kv([300.0, 300.0, 400.0, 50.0, 50.0, 50.0])
+
+    z0 = 0.95
+    z1 = 0.7565
+
+    if t &lt;= 3.0:
+        alpha = t / 3.0
+        z_tgt = z0 + (z1 - z0) * alpha
+    else:
+        z_tgt = z1
+
+    gp.control_dofs_position([0.0, 0.0, z_tgt, 0.0, 0.0, 0.0])
+
+    return
+
+ground = scene.add_entity(
+    morph=gs.morphs.Plane(pos=(0.0, 0.0, 0.0), euler=(0.0, 0.0, 0.0), fixed=True),
+    material=gs.materials.Rigid(rho=200.0, friction=1.0, coup_friction=0.6, coup_softness=0.002, coup_restitution=0.0),
+    surface=gs.surfaces.Default(color=(0.7, 0.7, 0.7), roughness=0.5, ior=1.5)
+)
+workbench = scene.add_entity(
+    morph=gs.morphs.Box(pos=(0.0, 0.0, 0.72), euler=(0.0, 0.0, 0.0), size=(1.0, 1.0, 0.06), fixed=True),
+    material=gs.materials.Rigid(rho=600.0, friction=0.10, coup_friction=0.10, coup_softness=0.002, coup_restitution=0.0),
+    surface=gs.surfaces.Rough(color=(0.60, 0.42, 0.25), double_sided=True)
+)
+glass_plate = scene.add_entity(
+    morph=gs.morphs.Box(pos=(0.0, 0.0, 0.95), euler=(0.0, 0.0, 0.0), size=(0.30, 0.30, 0.01), fixed=False),
+    material=gs.materials.Rigid(rho=2500.0, friction=0.6, coup_friction=0.05, coup_softness=0.003, coup_restitution=0.0),
+    surface=gs.surfaces.Glass(color=(0.9, 0.95, 1.0), double_sided=True)
+)
+dough = scene.add_entity(
+    morph=gs.morphs.Cylinder(pos=(0.0, 0.0, 0.785), euler=(0.0, 0.0, 0.0), radius=0.10, height=0.06, fixed=False),
+    material=gs.materials.MPM.ElastoPlastic(E=1.5e4, nu=0.47, rho=1000.0, sampler='pbs', von_mises_yield_stress=7.0e2),
+    surface=gs.surfaces.Default(color=(0.97, 0.94, 0.76), roughness=0.6, ior=1.4, vis_mode='recon')
+)
+
+if scene.is_built:
+    scene.reset()
+
+if not scene.is_built:
+    scene.build()
+horizon = 14168
+os.makedirs("logs/reproduce_log/rendered_video_20251028-163059", exist_ok=True)
+for _ in range(horizon):
+    gs.logger.info(f"{_}/{horizon} steps advanced")
+    entities_control(scene.entities, {'ground': 0, 'workbench': 1, 'glass_plate': 2, 'dough': 3}, scene.emitters, {}, scene.t, horizon)
+    camera_control(camera, {'ground': 0, 'workbench': 1, 'glass_plate': 2, 'dough': 3}, scene.t, scene.dt, horizon, _ == horizon - 1, "logs/reproduce_log/rendered_video_20251028-163059.mp4")
+    scene.step()</code></pre></div>
+      </div>
+    </div>
+
+    <div class="gs-code-legend" id="teaser-code-legend">
+      <span class="lg"><span class="dot" style="background:#8F7CCA"></span>Manager Agent&nbsp;— scene &amp; simulation config</span>
+      <span class="lg"><span class="dot" style="background:#A6C77F"></span>Entity Agent&nbsp;— entity creation &amp; control</span>
+      <span class="lg"><span class="dot" style="background:#EFB66F"></span>Render Agent&nbsp;— camera &amp; lighting</span>
+    </div>
+  </div>
+</section>
+
+<hr class="gs-rule">
+
+<!-- ===================== ABSTRACT ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 gs-section-title">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Creating dynamic and physically realistic 4D worlds from natural language descriptions is both
+            fascinating and challenging. Traditional computer graphics methods rely on manual creation, requiring
+            extensive human effort to fine-tune materials, motions, and visual fidelity. Recent advances in
+            generative foundation models have sparked interest in learning to generate such 4D worlds from
+            large-scale data; however, existing methods still struggle to ensure physical plausibility and
+            controllability. In this work, we take a different path by leveraging foundation models to construct
+            an agentic system that emulates how humans traditionally create 4D worlds, yet automates the entire
+            process. We present <strong>GS-Agent</strong>, an end-to-end multi-agent framework that integrates
+            physics engines in the loop to generate realistic, dynamic, and controllable <strong>4D physical
+            worlds</strong> from natural language. Inspired by how humans build 4D worlds, GS-Agent decomposes the
+            task into <em>entity management</em>, covering 3D asset curation, material tuning, placement, and
+            motion control, and <em>rendering configuration</em>, including camera and lighting manipulation.
+            Multiple agents with distinct expertise interact with the physics engine via code, seek multimodal
+            feedback, and collaborate to iteratively construct 4D worlds that align with the given descriptions.
+            Experimental results show that GS-Agent effectively converts natural language into diverse and
+            physically plausible 4D worlds exhibiting rich interactions among liquids, deformable objects, and
+            rigid bodies, while achieving cinematic camera and lighting control. We envision GS-Agent as a
+            foundation for a new paradigm in 4D world generation, empowering creative content creation and
+            physical AI.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== METHOD / PIPELINE ===================== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered" style="margin-bottom: 1.2rem;">
+      <p class="gs-eyebrow">How it works</p>
+      <h2 class="title is-3 gs-section-title">A Multi-Agent System Driving a Physics Engine</h2>
+    </div>
+    <div class="gs-pipeline">
+      <video src="./static/videos/method.mp4" autoplay muted loop playsinline
+             style="width: 100%; border-radius: 12px; box-shadow: 0 6px 24px rgba(26, 26, 46, 0.10); display: block;">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    <div class="columns is-centered" style="margin-top: 1.5rem;">
+      <div class="column is-four-fifths">
+        <div class="content">
+          <ul>
+            <li><strong>Manager Agent</strong> — interprets the natural language description, decomposes it into
+              actionable sub-tasks, and delegates them one at a time to the Entity or Render Agent. It configures
+              global simulation and visualization options (time step, substeps, gravity, solver settings),
+              controls timeline progression by advancing and resetting the scene, verifies intermediate results,
+              and triggers the final video capture.</li>
+            <li><strong>Entity Agent</strong> — curates assets by retrieving from a library (BlenderKit and
+              PolyHaven) via a text- and image-embedding index, generating new meshes when retrieval fails, and
+              falling back to primitives. It places entities under spatial constraints, iteratively tunes
+              physically plausible material parameters (e.g., Young's modulus, Poisson's ratio, yield stress)
+              from engine feedback, and controls motion through PD controllers, position/velocity/force commands,
+              and particle emitters.</li>
+            <li><strong>Render Agent</strong> — grounds verbal directives into camera placement and intrinsics,
+              scripts camera motion as executable trajectory code (orbits, dollies, entity tracking) synchronized
+              with simulation steps, configures lighting, and provides visual feedback to the other agents.</li>
+          </ul>
+          <p>
+            Agents communicate through a <code>SendMessage</code> tool and interact with the physics engine
+            through structured tool interfaces. All agents generate and refine executable code, request
+            multimodal feedback — physics boundary checks, program runtime information, images, and videos — and
+            iterate until the natural language goals are satisfied. The final 4D world is represented as
+            executable simulation code together with a rendered video.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gs-rule">
+
+<!-- ===================== QUALITATIVE COMPARISON ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered" style="margin-bottom: 1.0rem;">
+      <p class="gs-eyebrow">Comparison</p>
+      <h2 class="title is-3 gs-section-title">GS-Agent vs. Video & Agent Baselines</h2>
+      <p class="content" style="max-width: 740px; margin: 0.4rem auto 0;">
+        Same prompt, five systems. GS-Agent is compared against state-of-the-art text-to-video models
+        (<strong>Sora&nbsp;2</strong>, <strong>Wan&nbsp;2.2</strong>) and foundation-agent baselines
+        (<strong>SWE-Agent</strong> and our enhanced <strong>SWE-Agent&nbsp;w/&nbsp;Visual</strong> variant) that
+        write simulation code directly. Select a scene:
+      </p>
+    </div>
+
+    <div class="gs-scene-nav" id="cmp-nav">
+      <button data-scene="1" class="active">Sponge</button>
+      <button data-scene="2">Bullet &amp; Water</button>
+      <button data-scene="3">Strawberry Splash</button>
+      <button data-scene="4">Jelly Dragon</button>
+      <button data-scene="5">Rolling Ball</button>
+    </div>
+
+    <p class="gs-prompt" id="cmp-prompt"></p>
+
+    <!-- Ours highlighted -->
+    <div class="gs-ours-wrap">
+      <div class="gs-video is-ours">
+        <span class="gs-label is-ours">GS-Agent (Ours)</span>
+        <video id="cmp-ours" src="./static/videos/comparison/1_ours.mp4" autoplay muted loop playsinline></video>
+      </div>
+    </div>
+
+    <!-- Baselines -->
+    <div class="gs-grid cols-4">
+      <div class="gs-video">
+        <span class="gs-label">Sora 2</span>
+        <video id="cmp-sora2" src="./static/videos/comparison/1_sora2.mp4" autoplay muted loop playsinline></video>
+      </div>
+      <div class="gs-video">
+        <span class="gs-label">Wan 2.2</span>
+        <video id="cmp-wan" src="./static/videos/comparison/1_wan2.2.mp4" autoplay muted loop playsinline></video>
+      </div>
+      <div class="gs-video">
+        <span class="gs-label">SWE-Agent</span>
+        <video id="cmp-swe" src="./static/videos/comparison/1_SWEAgent.mp4" autoplay muted loop playsinline></video>
+      </div>
+      <div class="gs-video">
+        <span class="gs-label">SWE-Agent w/ Visual</span>
+        <video id="cmp-swev" src="./static/videos/comparison/1_SWEAgent_Visual.mp4" autoplay muted loop playsinline></video>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gs-rule">
+
+<!-- ===================== CONTROLLABILITY ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered" style="margin-bottom: 1.2rem;">
+      <p class="gs-eyebrow">Interactive &amp; editable</p>
+      <h2 class="title is-3 gs-section-title">Controllable Worlds</h2>
+      <p class="content" style="max-width: 720px; margin: 0.4rem auto 0;">
+        Because a GS-Agent world is a real simulation, it can be steered through natural language. Starting from
+        an initial scene, the user issues follow-up instructions — adjusting rendering effects, creating new
+        entities, and controlling object motion — and GS-Agent re-simulates the world consistently after each turn.
+      </p>
+    </div>
+
+    <div class="gs-chat">
+      <div class="gs-turn">
+        <div class="gs-user-msg">
+          <img class="gs-user-avatar" src="./static/images/user.png" alt="User">
+          <div class="gs-bubble">
+            <span class="gs-user-tag">User</span>
+            A white ball hitting a blue ball on the floor.
+          </div>
+        </div>
+        <div class="gs-agent-msg"><img class="gs-agent-avatar" src="./static/images/logo.png" alt="GS-Agent"><div class="gs-video"><video src="./static/videos/controllability/control_1.mp4" autoplay muted loop playsinline></video></div></div>
+      </div>
+
+      <div class="gs-turn">
+        <div class="gs-user-msg">
+          <img class="gs-user-avatar" src="./static/images/user.png" alt="User">
+          <div class="gs-bubble">
+            <span class="gs-user-tag">User</span>
+            Replay the collision as a slow-motion close-up.
+          </div>
+        </div>
+        <div class="gs-agent-msg"><img class="gs-agent-avatar" src="./static/images/logo.png" alt="GS-Agent"><div class="gs-video"><video src="./static/videos/controllability/control_2.mp4" autoplay muted loop playsinline></video></div></div>
+      </div>
+
+      <div class="gs-turn">
+        <div class="gs-user-msg">
+          <img class="gs-user-avatar" src="./static/images/user.png" alt="User">
+          <div class="gs-bubble">
+            <span class="gs-user-tag">User</span>
+            Add more billiard balls and rack them into a triangle.
+          </div>
+        </div>
+        <div class="gs-agent-msg"><img class="gs-agent-avatar" src="./static/images/logo.png" alt="GS-Agent"><div class="gs-video"><video src="./static/videos/controllability/control_3.mp4" autoplay muted loop playsinline></video></div></div>
+      </div>
+
+      <div class="gs-turn">
+        <div class="gs-user-msg">
+          <img class="gs-user-avatar" src="./static/images/user.png" alt="User">
+          <div class="gs-bubble">
+            <span class="gs-user-tag">User</span>
+            Speed up the white cue ball so it breaks the rack.
+          </div>
+        </div>
+        <div class="gs-agent-msg"><img class="gs-agent-avatar" src="./static/images/logo.png" alt="GS-Agent"><div class="gs-video"><video src="./static/videos/controllability/control_4.mp4" autoplay muted loop playsinline></video></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gs-rule">
+
+<!-- ===================== BIBTEX ===================== -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title gs-section-title">BibTeX</h2>
+    <pre><code>@misc{zhang2026gsagent,
+      title={GS-Agent: Creating 4D Physical Worlds With Generative Simulation},
+      author={Hongxin Zhang and Chunru Lin and Junyan Li and Zhou Xian and Tsun-Hsuan Wang and Chuang Gan},
+      year={2026},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            Website template borrowed from
+            <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ---------- Teaser: modality switching, auto-cycle, code auto-scroll ----------
+  (function () {
+    var toggle = document.getElementById('teaser-toggle');
+    if (!toggle) return;
+
+    var ORDER = ['rgb', 'normal', 'particle', 'code'];
+    var DURATION = { rgb: 5000, normal: 5000, particle: 5000, code: 11000 };
+    var legend = document.getElementById('teaser-code-legend');
+    var current = 'rgb';
+    var cycleTimer = null;
+    var scrollTimer = null;
+    var TICK = 30;   // ms
+
+    function stopCodeScroll() {
+      if (scrollTimer) { clearInterval(scrollTimer); scrollTimer = null; }
+    }
+    function startCodeScroll() {
+      stopCodeScroll();
+      var panels = Array.prototype.slice.call(document.querySelectorAll('#teaser-grid .gs-code'));
+      var holds = panels.map(function () { return 700; });   // brief pause at top before scrolling
+      scrollTimer = setInterval(function () {
+        panels.forEach(function (p, i) {
+          var max = p.scrollHeight - p.clientHeight;
+          if (max <= 2) return;
+          if (holds[i] > 0) { holds[i] -= TICK; return; }
+          if (p._atEnd) { p.scrollTop = 0; p._atEnd = false; holds[i] = 900; return; }  // resume from top
+          p.scrollTop += 5.6;   // ~187 px/s
+          if (p.scrollTop >= max - 1) { p.scrollTop = max; p._atEnd = true; holds[i] = 1400; }  // pause at bottom
+        });
+      }, TICK);
+    }
+
+    function setModality(modality) {
+      current = modality;
+      toggle.querySelectorAll('button').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-modality') === modality);
+      });
+      var showCode = (modality === 'code');
+      document.querySelectorAll('#teaser-grid .gs-code').forEach(function (c) { c.hidden = !showCode; });
+      document.querySelectorAll('#teaser-grid .gs-video').forEach(function (c) { c.style.display = showCode ? 'none' : ''; });
+      if (legend) legend.style.display = showCode ? 'flex' : 'none';
+
+      if (showCode) {
+        document.querySelectorAll('#teaser-grid video').forEach(function (v) { v.pause(); });
+        document.querySelectorAll('#teaser-grid .gs-code').forEach(function (c) { c.scrollTop = 0; });
+        startCodeScroll();
+      } else {
+        stopCodeScroll();
+        document.querySelectorAll('#teaser-grid video').forEach(function (v) {
+          var scene = v.getAttribute('data-scene');
+          v.src = './static/videos/teaser/' + scene + '_' + modality + '.mp4';
+          v.load();
+          v.play().catch(function () {});
+        });
+      }
+    }
+
+    function scheduleNext() {
+      clearTimeout(cycleTimer);
+      cycleTimer = setTimeout(function () {
+        var next = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
+        setModality(next);
+        scheduleNext();
+      }, DURATION[current] || 5000);
+    }
+
+    toggle.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      setModality(btn.getAttribute('data-modality'));
+      scheduleNext();   // manual pick continues the auto-cycle from here
+    });
+
+    // kick off the auto-cycle
+    setModality('rgb');
+    scheduleNext();
+  })();
+
+  // ---------- Comparison scene selector ----------
+  (function () {
+    var nav = document.getElementById('cmp-nav');
+    if (!nav) return;
+    var prompts = {
+      '1': 'A photorealistic fixed-view video of a horizontal, rectangular, pink sponge being compressed tightly by two transparent glass clamp blocks on both ends, and then twisted until the sponge violently fractures.',
+      '2': 'A highly detailed CGI simulation of a bullet piercing a large sphere of water that is floating in the air. Shot in extreme slow motion, the bullet creates a splash as it enters and a cavitation trail as it passes through. The camera follows the bullet, pushing forward and passing through the water sphere as it disintegrates.',
+      '3': 'A fixed-camera shot captures a vivid red strawberry striking a small transparent water droplet in mid-air.',
+      '4': 'A translucent green jelly dragon is tossed into the air. A sharp blade slices it mid-flight into two large wobbling halves that jiggle realistically as they fall to the ground in slow motion.',
+      '5': 'A tracking shot of a green ball rolling on the floor while another yellow cylinder sits on the floor.'
+    };
+    var ids = {
+      'cmp-ours':  'ours',
+      'cmp-sora2': 'sora2',
+      'cmp-wan':   'wan2.2',
+      'cmp-swe':   'SWEAgent',
+      'cmp-swev':  'SWEAgent_Visual'
+    };
+    function setScene(scene) {
+      document.getElementById('cmp-prompt').textContent = prompts[scene];
+      Object.keys(ids).forEach(function (id) {
+        var v = document.getElementById(id);
+        v.src = './static/videos/comparison/' + scene + '_' + ids[id] + '.mp4';
+        v.load();
+        v.play().catch(function () {});
+      });
+    }
+    nav.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      nav.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      setScene(btn.getAttribute('data-scene'));
+    });
+    setScene('1');
+  })();
+
+  // ---------- syntax highlighting + per-agent block coloring ----------
+  // Colors mirror pipeline.png: Manager=violet, Entity=green, Render=orange.
+  (function () {
+    function stripTags(s) { return s.replace(/<[^>]*>/g, ''); }
+    function colorize(el) {
+      var lines = el.innerHTML.split('\n');
+      // Scene/sim config leads (Manager); switch on structural anchors.
+      var cat = 'manager';
+      var out = lines.map(function (line) {
+        var text = stripTags(line);
+        if (/^\s*def\s+camera_control\b/.test(text)) {
+          cat = 'render';                              // camera & lighting -> Render Agent
+        } else if (/^\s*def\s+entities_control\b/.test(text)) {
+          cat = 'entity';                              // entity control -> Entity Agent
+        } else if (/^\s*(if\s+is_particle_view|ground\s*=\s*scene\.add_entity)/.test(text)) {
+          cat = 'entity';                              // entity creation -> Entity Agent
+        } else if (/^\s*if\s+not\s+scene\.is_built\b/.test(text)) {
+          cat = 'manager';                             // build & rollout -> Manager Agent
+        }
+        var cls = 'cbl cbl-' + cat;
+        return '<span class="' + cls + '">' + (line.length ? line : '​') + '</span>';
+      });
+      el.innerHTML = out.join('');   // block spans; drop raw newlines to avoid double spacing
+    }
+    document.querySelectorAll('#teaser-grid code.language-python').forEach(function (el) {
+      if (window.hljs) window.hljs.highlightElement(el);
+      colorize(el);
+    });
+  })();
+</script>
+
+</body>
+</html>
