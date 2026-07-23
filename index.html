@@ -560,11 +560,6 @@ for _ in range(horizon):
       </div>
     </div>
 
-    <div class="gs-code-legend" id="teaser-code-legend">
-      <span class="lg"><span class="dot" style="background:#8F7CCA"></span>Manager Agent&nbsp;— scene &amp; simulation config</span>
-      <span class="lg"><span class="dot" style="background:#A6C77F"></span>Entity Agent&nbsp;— entity creation &amp; control</span>
-      <span class="lg"><span class="dot" style="background:#EFB66F"></span>Render Agent&nbsp;— camera &amp; lighting</span>
-    </div>
   </div>
 </section>
 
@@ -807,7 +802,6 @@ for _ in range(horizon):
 
     var ORDER = ['rgb', 'normal', 'particle', 'code'];
     var DURATION = { rgb: 5000, normal: 5000, particle: 5000, code: 11000 };
-    var legend = document.getElementById('teaser-code-legend');
     var current = 'rgb';
     var cycleTimer = null;
     var scrollTimer = null;
@@ -840,7 +834,6 @@ for _ in range(horizon):
       var showCode = (modality === 'code');
       document.querySelectorAll('#teaser-grid .gs-code').forEach(function (c) { c.hidden = !showCode; });
       document.querySelectorAll('#teaser-grid .gs-video').forEach(function (c) { c.style.display = showCode ? 'none' : ''; });
-      if (legend) legend.style.display = showCode ? 'flex' : 'none';
 
       if (showCode) {
         document.querySelectorAll('#teaser-grid video').forEach(function (v) { v.pause(); });
